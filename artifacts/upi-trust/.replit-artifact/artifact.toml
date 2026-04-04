@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "UPI Trust Score"
+version = "1.0.0"
+id = "artifacts/upi-trust"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24504
+
+[services.development]
+run = "pnpm --filter @workspace/upi-trust run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/upi-trust", "run", "build" ]
+publicDir = "artifacts/upi-trust/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24504"
+BASE_PATH = "/"

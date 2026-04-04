@@ -6,4 +6,16 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from "./createMerchantBody";
+export * from "./dashboardSummary";
+export * from "./errorResponse";
+export * from "./fraudReportResult";
 export * from "./healthStatus";
+export * from "./merchant";
+export * from "./merchantRiskLevel";
+export * from "./merchantStats";
+export * from "./reportFraudBody";
+export * from "./submitVoteBody";
+export * from "./voteRecord";
+export * from "./voteResult";
+export * from "./weeklyVoteStat";

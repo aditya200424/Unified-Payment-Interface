@@ -14,3 +14,180 @@ import * as zod from "zod";
 export const HealthCheckResponse = zod.object({
   status: zod.string(),
 });
+
+/**
+ * Returns a list of all merchants with their trust scores
+ * @summary Get all merchants
+ */
+export const GetMerchantsResponseItem = zod.object({
+  id: zod.number(),
+  upiId: zod.string(),
+  name: zod.string(),
+  category: zod.string(),
+  totalTransactions: zod.number(),
+  happyTransactions: zod.number(),
+  fraudReports: zod.number(),
+  trustScore: zod.number(),
+  satisfactionPercent: zod.number(),
+  riskLevel: zod.enum(["Safe", "Medium", "Risky"]),
+  isVerified: zod.boolean(),
+  createdAt: zod.string(),
+});
+export const GetMerchantsResponse = zod.array(GetMerchantsResponseItem);
+
+/**
+ * @summary Create a merchant
+ */
+export const CreateMerchantBody = zod.object({
+  upiId: zod.string(),
+  name: zod.string(),
+  category: zod.string(),
+  isVerified: zod.boolean().optional(),
+});
+
+/**
+ * Returns merchant trust info and risk level
+ * @summary Get merchant by UPI ID
+ */
+export const GetMerchantParams = zod.object({
+  upiId: zod.coerce.string(),
+});
+
+export const GetMerchantResponse = zod.object({
+  id: zod.number(),
+  upiId: zod.string(),
+  name: zod.string(),
+  category: zod.string(),
+  totalTransactions: zod.number(),
+  happyTransactions: zod.number(),
+  fraudReports: zod.number(),
+  trustScore: zod.number(),
+  satisfactionPercent: zod.number(),
+  riskLevel: zod.enum(["Safe", "Medium", "Risky"]),
+  isVerified: zod.boolean(),
+  createdAt: zod.string(),
+});
+
+/**
+ * Submit vote after transaction. Anti-fake logic applied.
+ * @summary Submit a post-payment vote
+ */
+export const SubmitVoteParams = zod.object({
+  upiId: zod.coerce.string(),
+});
+
+export const SubmitVoteBody = zod.object({
+  voterUpiId: zod.string(),
+  isHappy: zod.boolean(),
+  isTransactionSafe: zod.boolean(),
+  didMerchantBehave: zod.boolean(),
+  isSatisfied: zod.boolean(),
+  amountPaid: zod.number().nullish(),
+});
+
+export const SubmitVoteResponse = zod.object({
+  success: zod.boolean(),
+  message: zod.string(),
+  updatedMerchant: zod.object({
+    id: zod.number(),
+    upiId: zod.string(),
+    name: zod.string(),
+    category: zod.string(),
+    totalTransactions: zod.number(),
+    happyTransactions: zod.number(),
+    fraudReports: zod.number(),
+    trustScore: zod.number(),
+    satisfactionPercent: zod.number(),
+    riskLevel: zod.enum(["Safe", "Medium", "Risky"]),
+    isVerified: zod.boolean(),
+    createdAt: zod.string(),
+  }),
+});
+
+/**
+ * Returns full analytics including weekly breakdown and vote history
+ * @summary Get detailed merchant stats
+ */
+export const GetMerchantStatsParams = zod.object({
+  upiId: zod.coerce.string(),
+});
+
+export const GetMerchantStatsResponse = zod.object({
+  merchant: zod.object({
+    id: zod.number(),
+    upiId: zod.string(),
+    name: zod.string(),
+    category: zod.string(),
+    totalTransactions: zod.number(),
+    happyTransactions: zod.number(),
+    fraudReports: zod.number(),
+    trustScore: zod.number(),
+    satisfactionPercent: zod.number(),
+    riskLevel: zod.enum(["Safe", "Medium", "Risky"]),
+    isVerified: zod.boolean(),
+    createdAt: zod.string(),
+  }),
+  weeklyVotes: zod.array(
+    zod.object({
+      week: zod.string(),
+      happy: zod.number(),
+      total: zod.number(),
+    }),
+  ),
+  recentVotes: zod.array(
+    zod.object({
+      id: zod.number(),
+      isHappy: zod.boolean(),
+      createdAt: zod.string(),
+    }),
+  ),
+  fraudReportCount: zod.number(),
+});
+
+/**
+ * Fraud reports reduce trust score faster
+ * @summary Report merchant as fraudulent
+ */
+export const ReportFraudParams = zod.object({
+  upiId: zod.coerce.string(),
+});
+
+export const ReportFraudBody = zod.object({
+  reporterUpiId: zod.string(),
+  reason: zod.string(),
+});
+
+export const ReportFraudResponse = zod.object({
+  success: zod.boolean(),
+  message: zod.string(),
+});
+
+/**
+ * Returns platform-wide trust stats for the dashboard
+ * @summary Get dashboard summary stats
+ */
+export const GetDashboardSummaryResponse = zod.object({
+  totalMerchants: zod.number(),
+  totalTransactions: zod.number(),
+  safeMerchants: zod.number(),
+  mediumMerchants: zod.number(),
+  riskyMerchants: zod.number(),
+  averageTrustScore: zod.number(),
+  totalFraudReports: zod.number(),
+  topTrustedMerchants: zod.array(
+    zod.object({
+      id: zod.number(),
+      upiId: zod.string(),
+      name: zod.string(),
+      category: zod.string(),
+      totalTransactions: zod.number(),
+      happyTransactions: zod.number(),
+      fraudReports: zod.number(),
+      trustScore: zod.number(),
+      satisfactionPercent: zod.number(),
+      riskLevel: zod.enum(["Safe", "Medium", "Risky"]),
+      isVerified: zod.boolean(),
+      createdAt: zod.string(),
+    }),
+  ),
+});

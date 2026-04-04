@@ -8,3 +8,94 @@
 export interface HealthStatus {
   status: string;
 }
+
+export type MerchantRiskLevel =
+  (typeof MerchantRiskLevel)[keyof typeof MerchantRiskLevel];
+
+export const MerchantRiskLevel = {
+  Safe: "Safe",
+  Medium: "Medium",
+  Risky: "Risky",
+} as const;
+
+export interface Merchant {
+  id: number;
+  upiId: string;
+  name: string;
+  category: string;
+  totalTransactions: number;
+  happyTransactions: number;
+  fraudReports: number;
+  trustScore: number;
+  satisfactionPercent: number;
+  riskLevel: MerchantRiskLevel;
+  isVerified: boolean;
+  createdAt: string;
+}
+
+export interface CreateMerchantBody {
+  upiId: string;
+  name: string;
+  category: string;
+  isVerified?: boolean;
+}
+
+export interface SubmitVoteBody {
+  voterUpiId: string;
+  isHappy: boolean;
+  isTransactionSafe: boolean;
+  didMerchantBehave: boolean;
+  isSatisfied: boolean;
+  /** @nullable */
+  amountPaid?: number | null;
+}
+
+export interface VoteResult {
+  success: boolean;
+  message: string;
+  updatedMerchant: Merchant;
+}
+
+export interface ReportFraudBody {
+  reporterUpiId: string;
+  reason: string;
+}
+
+export interface FraudReportResult {
+  success: boolean;
+  message: string;
+}
+
+export interface WeeklyVoteStat {
+  week: string;
+  happy: number;
+  total: number;
+}
+
+export interface VoteRecord {
+  id: number;
+  isHappy: boolean;
+  createdAt: string;
+}
+
+export interface MerchantStats {
+  merchant: Merchant;
+  weeklyVotes: WeeklyVoteStat[];
+  recentVotes: VoteRecord[];
+  fraudReportCount: number;
+}
+
+export interface DashboardSummary {
+  totalMerchants: number;
+  totalTransactions: number;
+  safeMerchants: number;
+  mediumMerchants: number;
+  riskyMerchants: number;
+  averageTrustScore: number;
+  totalFraudReports: number;
+  topTrustedMerchants: Merchant[];
+}
+
+export interface ErrorResponse {
+  error: string;
+}

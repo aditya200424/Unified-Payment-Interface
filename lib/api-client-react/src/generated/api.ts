@@ -5,18 +5,32 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
+  MutationFunction,
   QueryFunction,
   QueryKey,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult,
 } from "@tanstack/react-query";
 
-import type { HealthStatus } from "./api.schemas";
+import type {
+  CreateMerchantBody,
+  DashboardSummary,
+  ErrorResponse,
+  FraudReportResult,
+  HealthStatus,
+  Merchant,
+  MerchantStats,
+  ReportFraudBody,
+  SubmitVoteBody,
+  VoteResult,
+} from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
-import type { ErrorType } from "../custom-fetch";
+import type { ErrorType, BodyType } from "../custom-fetch";
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
@@ -92,6 +106,596 @@ export function useHealthCheck<
   request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getHealthCheckQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Returns a list of all merchants with their trust scores
+ * @summary Get all merchants
+ */
+export const getGetMerchantsUrl = () => {
+  return `/api/merchants`;
+};
+
+export const getMerchants = async (
+  options?: RequestInit,
+): Promise<Merchant[]> => {
+  return customFetch<Merchant[]>(getGetMerchantsUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetMerchantsQueryKey = () => {
+  return [`/api/merchants`] as const;
+};
+
+export const getGetMerchantsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getMerchants>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getMerchants>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetMerchantsQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getMerchants>>> = ({
+    signal,
+  }) => getMerchants({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getMerchants>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetMerchantsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getMerchants>>
+>;
+export type GetMerchantsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get all merchants
+ */
+
+export function useGetMerchants<
+  TData = Awaited<ReturnType<typeof getMerchants>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getMerchants>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetMerchantsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Create a merchant
+ */
+export const getCreateMerchantUrl = () => {
+  return `/api/merchants`;
+};
+
+export const createMerchant = async (
+  createMerchantBody: CreateMerchantBody,
+  options?: RequestInit,
+): Promise<Merchant> => {
+  return customFetch<Merchant>(getCreateMerchantUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createMerchantBody),
+  });
+};
+
+export const getCreateMerchantMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createMerchant>>,
+    TError,
+    { data: BodyType<CreateMerchantBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createMerchant>>,
+  TError,
+  { data: BodyType<CreateMerchantBody> },
+  TContext
+> => {
+  const mutationKey = ["createMerchant"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createMerchant>>,
+    { data: BodyType<CreateMerchantBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createMerchant(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateMerchantMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createMerchant>>
+>;
+export type CreateMerchantMutationBody = BodyType<CreateMerchantBody>;
+export type CreateMerchantMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Create a merchant
+ */
+export const useCreateMerchant = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createMerchant>>,
+    TError,
+    { data: BodyType<CreateMerchantBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createMerchant>>,
+  TError,
+  { data: BodyType<CreateMerchantBody> },
+  TContext
+> => {
+  return useMutation(getCreateMerchantMutationOptions(options));
+};
+
+/**
+ * Returns merchant trust info and risk level
+ * @summary Get merchant by UPI ID
+ */
+export const getGetMerchantUrl = (upiId: string) => {
+  return `/api/merchants/${upiId}`;
+};
+
+export const getMerchant = async (
+  upiId: string,
+  options?: RequestInit,
+): Promise<Merchant> => {
+  return customFetch<Merchant>(getGetMerchantUrl(upiId), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetMerchantQueryKey = (upiId: string) => {
+  return [`/api/merchants/${upiId}`] as const;
+};
+
+export const getGetMerchantQueryOptions = <
+  TData = Awaited<ReturnType<typeof getMerchant>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  upiId: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getMerchant>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetMerchantQueryKey(upiId);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getMerchant>>> = ({
+    signal,
+  }) => getMerchant(upiId, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!upiId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getMerchant>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetMerchantQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getMerchant>>
+>;
+export type GetMerchantQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Get merchant by UPI ID
+ */
+
+export function useGetMerchant<
+  TData = Awaited<ReturnType<typeof getMerchant>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  upiId: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getMerchant>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetMerchantQueryOptions(upiId, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Submit vote after transaction. Anti-fake logic applied.
+ * @summary Submit a post-payment vote
+ */
+export const getSubmitVoteUrl = (upiId: string) => {
+  return `/api/merchants/${upiId}/vote`;
+};
+
+export const submitVote = async (
+  upiId: string,
+  submitVoteBody: SubmitVoteBody,
+  options?: RequestInit,
+): Promise<VoteResult> => {
+  return customFetch<VoteResult>(getSubmitVoteUrl(upiId), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(submitVoteBody),
+  });
+};
+
+export const getSubmitVoteMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof submitVote>>,
+    TError,
+    { upiId: string; data: BodyType<SubmitVoteBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof submitVote>>,
+  TError,
+  { upiId: string; data: BodyType<SubmitVoteBody> },
+  TContext
+> => {
+  const mutationKey = ["submitVote"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof submitVote>>,
+    { upiId: string; data: BodyType<SubmitVoteBody> }
+  > = (props) => {
+    const { upiId, data } = props ?? {};
+
+    return submitVote(upiId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type SubmitVoteMutationResult = NonNullable<
+  Awaited<ReturnType<typeof submitVote>>
+>;
+export type SubmitVoteMutationBody = BodyType<SubmitVoteBody>;
+export type SubmitVoteMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Submit a post-payment vote
+ */
+export const useSubmitVote = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof submitVote>>,
+    TError,
+    { upiId: string; data: BodyType<SubmitVoteBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof submitVote>>,
+  TError,
+  { upiId: string; data: BodyType<SubmitVoteBody> },
+  TContext
+> => {
+  return useMutation(getSubmitVoteMutationOptions(options));
+};
+
+/**
+ * Returns full analytics including weekly breakdown and vote history
+ * @summary Get detailed merchant stats
+ */
+export const getGetMerchantStatsUrl = (upiId: string) => {
+  return `/api/merchants/${upiId}/stats`;
+};
+
+export const getMerchantStats = async (
+  upiId: string,
+  options?: RequestInit,
+): Promise<MerchantStats> => {
+  return customFetch<MerchantStats>(getGetMerchantStatsUrl(upiId), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetMerchantStatsQueryKey = (upiId: string) => {
+  return [`/api/merchants/${upiId}/stats`] as const;
+};
+
+export const getGetMerchantStatsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getMerchantStats>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  upiId: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getMerchantStats>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetMerchantStatsQueryKey(upiId);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getMerchantStats>>
+  > = ({ signal }) => getMerchantStats(upiId, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!upiId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getMerchantStats>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetMerchantStatsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getMerchantStats>>
+>;
+export type GetMerchantStatsQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Get detailed merchant stats
+ */
+
+export function useGetMerchantStats<
+  TData = Awaited<ReturnType<typeof getMerchantStats>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  upiId: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getMerchantStats>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetMerchantStatsQueryOptions(upiId, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Fraud reports reduce trust score faster
+ * @summary Report merchant as fraudulent
+ */
+export const getReportFraudUrl = (upiId: string) => {
+  return `/api/merchants/${upiId}/report-fraud`;
+};
+
+export const reportFraud = async (
+  upiId: string,
+  reportFraudBody: ReportFraudBody,
+  options?: RequestInit,
+): Promise<FraudReportResult> => {
+  return customFetch<FraudReportResult>(getReportFraudUrl(upiId), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(reportFraudBody),
+  });
+};
+
+export const getReportFraudMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof reportFraud>>,
+    TError,
+    { upiId: string; data: BodyType<ReportFraudBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof reportFraud>>,
+  TError,
+  { upiId: string; data: BodyType<ReportFraudBody> },
+  TContext
+> => {
+  const mutationKey = ["reportFraud"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof reportFraud>>,
+    { upiId: string; data: BodyType<ReportFraudBody> }
+  > = (props) => {
+    const { upiId, data } = props ?? {};
+
+    return reportFraud(upiId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ReportFraudMutationResult = NonNullable<
+  Awaited<ReturnType<typeof reportFraud>>
+>;
+export type ReportFraudMutationBody = BodyType<ReportFraudBody>;
+export type ReportFraudMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Report merchant as fraudulent
+ */
+export const useReportFraud = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof reportFraud>>,
+    TError,
+    { upiId: string; data: BodyType<ReportFraudBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof reportFraud>>,
+  TError,
+  { upiId: string; data: BodyType<ReportFraudBody> },
+  TContext
+> => {
+  return useMutation(getReportFraudMutationOptions(options));
+};
+
+/**
+ * Returns platform-wide trust stats for the dashboard
+ * @summary Get dashboard summary stats
+ */
+export const getGetDashboardSummaryUrl = () => {
+  return `/api/dashboard/summary`;
+};
+
+export const getDashboardSummary = async (
+  options?: RequestInit,
+): Promise<DashboardSummary> => {
+  return customFetch<DashboardSummary>(getGetDashboardSummaryUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetDashboardSummaryQueryKey = () => {
+  return [`/api/dashboard/summary`] as const;
+};
+
+export const getGetDashboardSummaryQueryOptions = <
+  TData = Awaited<ReturnType<typeof getDashboardSummary>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getDashboardSummary>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetDashboardSummaryQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getDashboardSummary>>
+  > = ({ signal }) => getDashboardSummary({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getDashboardSummary>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetDashboardSummaryQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getDashboardSummary>>
+>;
+export type GetDashboardSummaryQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get dashboard summary stats
+ */
+
+export function useGetDashboardSummary<
+  TData = Awaited<ReturnType<typeof getDashboardSummary>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getDashboardSummary>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetDashboardSummaryQueryOptions(options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;
