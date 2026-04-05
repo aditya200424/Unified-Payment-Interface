@@ -1,3 +1,6 @@
 <svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="180" height="180" rx="36" fill="#FF3C00"/>
+  <rect width="180" height="180" rx="36" fill="#2563EB"/>
+  <path d="M90 30 L145 52 L145 95 C145 125 90 155 90 155 C90 155 35 125 35 95 L35 52 Z" fill="white" fill-opacity="0.15"/>
+  <path d="M90 36 L140 56 L140 95 C140 122 90 150 90 150 C90 150 40 122 40 95 L40 56 Z" fill="white" fill-opacity="0.9"/>
+  <path d="M72 92 L84 104 L110 76" stroke="#2563EB" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
