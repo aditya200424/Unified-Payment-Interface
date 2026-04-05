@@ -1,0 +1,27 @@
+kind = "mobile"
+previewPath = "/mobile/"
+title = "UPI TrustScore Mobile"
+version = "1.0.0"
+id = "artifacts/upi-trust-mobile"
+router = "expo-domain"
+
+[[integratedSkills]]
+name = "expo"
+version = "1.0.0"
+
+[[services]]
+ensurePreviewReachable = "/status"
+name = "expo"
+paths = [ "/mobile/" ]
+localPort = 19947
+
+[services.development]
+run = "pnpm --filter @workspace/upi-trust-mobile run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/upi-trust-mobile", "run", "build" ]
+run = [ "pnpm", "--filter", "@workspace/upi-trust-mobile", "run", "serve" ]
+
+[services.env]
+PORT = "19947"
+BASE_PATH = "/mobile/"

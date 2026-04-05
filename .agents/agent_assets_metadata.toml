@@ -1,0 +1,8 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "ZVM4YxPDQKeiCAkBkPNta"
+uri = "file://artifacts/upi-trust-mobile/assets/images/icon.png"
+type = "image"
+title = "generated_image"
